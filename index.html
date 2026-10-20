@@ -984,9 +984,35 @@ async function dance(ms = 3600) {
   await wait(n * beat);
   await setPose('idle'); busy = false;
 }
+/* ---------- взмах лапой: 6 кадров ChatGPT ----------
+   Кадры вырезаны из листа, выровнены с базовой позой по росту, шортам и ступням.
+   Идут покадрово по 260 мс без смешивания — как в одобренной гифке. */
+const WAVE6 = new Image(); WAVE6.src = 'assets/slon/rig/wave6.webp';
+const WAVE6_N = 6, WAVE6_MS = 260;
+function playWave6() {
+  poseQueue = poseQueue.then(async () => { if (pose !== 'idle') await setPose('idle'); })
+    .then(() => new Promise(res => {
+      if (reduced || !WAVE6.naturalWidth) { res(); return; }
+      morphing = true; lids.style.opacity = 0;
+      const Wc = petCanvas.width, Hc = petCanvas.height, fw = WAVE6.naturalWidth / WAVE6_N, fh = WAVE6.naturalHeight;
+      let i = 0;
+      const st = () => {
+        if (i >= WAVE6_N) { pose = 'idle'; morphing = false; drawStill('idle'); res(); return; }
+        pctx.clearRect(0, 0, Wc, Hc); pctx.drawImage(WAVE6, i * fw, 0, fw, fh, 0, 0, Wc, Hc);
+        i++; setTimeout(st, WAVE6_MS);
+      };
+      st();
+    }));
+  return poseQueue;
+}
+async function waveHello(text) {
+  busy = true; if (text) say(text, 2400);
+  await playWave6();
+  busy = false;
+}
 const IDLE = [
-  () => gesture('hello', 1700, pick(['Привет!', 'Я тут!', 'Как дела?'])),
-  () => gesture('wave', 1500),
+  () => waveHello(pick(['Привет!', 'Я тут!', 'Как дела?'])),
+  () => waveHello(),
   () => gesture('lean', 1800, pick(['Что там у тебя?', 'Покажешь, что купим?'])),
   () => gesture('point', 1800, pick(['Смотри, какая щётка!', 'Я молодец!'])),
   () => { say('Танцую!', 2400); dance(); },
@@ -1140,7 +1166,7 @@ async function onPetEnter() {
     say('Привет! Лови со мной фрукты и чисти зубки — я буду расти и дарить промокоды', 3800);
     await wait(1800); setPose('idle'); busy = false;
     setTimeout(() => { if (current === 'pet' && !busy) gesture('tilt', 2200, 'Зубки чешутся… почистим?'); }, 4200);
-  } else if (!busy) { busy = true; setPose('wave'); jump(24); await wait(1100); await setPose('idle'); busy = false; }
+  } else if (!busy) { waveHello(); }
 }
 
 /* ---------- каталог ---------- */

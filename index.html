@@ -263,8 +263,8 @@ img{max-width:100%;display:block}
 /* ---------- шторка и модалки ---------- */
 .scrim{position:absolute;inset:0;background:rgba(14,12,50,.45);z-index:20;opacity:0;pointer-events:none;transition:opacity .25s}
 .scrim.on{opacity:1;pointer-events:auto}
-.sheet{position:absolute;left:0;right:0;bottom:0;z-index:21;background:#fff;border-radius:28px 28px 0 0;padding:10px 16px 30px;transform:translateY(105%);transition:transform .38s cubic-bezier(.2,.9,.3,1);max-height:82%;overflow-y:auto;scrollbar-width:none}
-.sheet.on{transform:translateY(0)}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:21;background:#fff;border-radius:28px 28px 0 0;padding:10px 16px 30px;transform:translateY(105%);visibility:hidden;transition:transform .38s cubic-bezier(.2,.9,.3,1), visibility 0s .38s;max-height:82%;overflow-y:auto;scrollbar-width:none}
+.sheet.on{transform:translateY(0);visibility:visible;transition:transform .38s cubic-bezier(.2,.9,.3,1), visibility 0s}
 .sheet .grab{width:40px;height:5px;border-radius:5px;background:#dcdce6;margin:0 auto 12px}
 .sheet h3{font-size:22px;font-weight:800;margin:0 0 4px;letter-spacing:-.01em}
 .sheet .sub{color:var(--muted);font-size:14px;margin:0 0 16px;line-height:1.4}
@@ -352,12 +352,12 @@ img{max-width:100%;display:block}
 .confetti i{position:absolute;top:-20px;width:9px;height:14px;border-radius:2px;animation:fall linear forwards}
 @keyframes fall{to{transform:translate(var(--dx),900px) rotate(var(--r))}}
 
-.snack{position:absolute;left:16px;right:16px;top:calc(var(--sb-h) + 8px);z-index:95;background:var(--ink);color:#fff;border-radius:16px;padding:12px 14px;font-size:14px;line-height:1.4;font-weight:500;transform:translateY(-140%);opacity:0;transition:transform .35s cubic-bezier(.2,1.2,.4,1), opacity .25s}
-.snack.on{transform:translateY(0);opacity:1}
+.snack{position:absolute;left:16px;right:16px;top:calc(var(--sb-h) + 8px);z-index:95;background:var(--ink);color:#fff;border-radius:16px;padding:12px 14px;font-size:14px;line-height:1.4;font-weight:500;transform:translateY(-140%);opacity:0;visibility:hidden;transition:transform .35s cubic-bezier(.2,1.2,.4,1), opacity .25s, visibility 0s .35s}
+.snack.on{transform:translateY(0);opacity:1;visibility:visible;transition:transform .35s cubic-bezier(.2,1.2,.4,1), opacity .25s, visibility 0s}
 
 /* ---------- игра ---------- */
-.game{position:absolute;inset:0;z-index:40;background:#9aa4f4 url(assets/game/game_bg.jpg) 50% 0/100% auto no-repeat;color:var(--ink);display:flex;flex-direction:column;align-items:center;padding:calc(var(--sb-h) + 4px) 16px 24px;transform:translateY(100%);transition:transform .45s cubic-bezier(.2,.9,.3,1);overflow:hidden}
-.game.on{transform:translateY(0)}
+.game{position:absolute;inset:0;z-index:40;background:#9aa4f4 url(assets/game/game_bg.jpg) 50% 0/100% auto no-repeat;color:var(--ink);display:flex;flex-direction:column;align-items:center;padding:calc(var(--sb-h) + 4px) 16px 24px;transform:translateY(100%);visibility:hidden;transition:transform .45s cubic-bezier(.2,.9,.3,1), visibility 0s .45s;overflow:hidden}
+.game.on{transform:translateY(0);visibility:visible;transition:transform .45s cubic-bezier(.2,.9,.3,1), visibility 0s}
 .game::before{display:none;content:"";position:absolute;inset:0;background:radial-gradient(circle at 20% 20%, rgba(255,255,255,.12) 0 2px, transparent 3px) 0 0/46px 46px, radial-gradient(circle at 70% 60%, rgba(255,255,255,.08) 0 2px, transparent 3px) 0 0/62px 62px;pointer-events:none}
 .g-top{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative}
 .g-top h3{margin:0;font-size:18px;font-weight:800}
@@ -704,7 +704,7 @@ const PRODUCTS = [
   { id: 'cura', name: 'Curaprox CS 5460 Ultra Soft', type: 'Зубная щётка', cat: 'brush', price: 590, old: 690, earn: 60, country: 'ch', rating: '4,9', reviews: '1 204', hit: true, art: 'brush', tint: '#fff0e6' },
   { id: 'bior', name: 'Biorepair Total Protection, 75 мл', type: 'Зубная паста', cat: 'paste', price: 790, earn: 80, country: 'it', rating: '4,8', reviews: '836', art: 'tube', tint: '#e9f6ee', c: ['#ffffff', '#1aa260', '#0b5d3b'], label: 'BIOREPAIR' },
   { id: 'lion', name: 'Lion Clinica Advantage, 130 г', type: 'Зубная паста', cat: 'paste', price: 450, old: 520, earn: 45, country: 'jp', rating: '4,7', reviews: '512', art: 'tube', tint: '#edf1ff', c: ['#ffffff', '#2f6bff', '#e2343f'], label: 'CLINICA' },
-  { id: 'rev', name: 'Ирригатор Revyline RL 450', type: 'Ирригатор', cat: 'irr', price: 4990, old: 5990, earn: 300, country: null, rating: '5,0', reviews: '152', hit: true, art: 'irr', tint: '#f0efff' }
+  { id: 'rev', name: 'Revyline RL 450', type: 'Ирригатор', cat: 'irr', price: 4990, old: 5990, earn: 300, country: null, rating: '5,0', reviews: '152', hit: true, art: 'irr', tint: '#f0efff' }
 ];
 const LEVELS = [
   { lv: 2, title: 'Скидка 5% на заказ', code: 'SLON5', kind: 'pct', val: 5 },
@@ -1627,8 +1627,10 @@ function finishGame() {
    конфеты портят зубки. В корзине видно, что уже поймано. */
 const CATCH = { on: false, items: [], good: {}, goodN: 0, bad: 0, left: 30, pile: [], pops: [] };
 const CIMG = {};
-[...FOODS.map(f => f.id), 'candy', 'basket'].forEach(n => { const im = new Image(); im.src = `assets/food/${n}.webp`; CIMG[n] = im; });
+[...FOODS.map(f => f.id), 'candy', 'basket', 'basket_front'].forEach(n => { const im = new Image(); im.src = `assets/food/${n}.webp`; CIMG[n] = im; });
 const BASKET = { w: 124, h: 148, rim: .40 };
+// места для пойманного внутри корзинки (координаты картинки 320×382): сначала передний ряд по центру, потом задний
+const PILE_SLOTS = [[160, 202, 1], [108, 204, 1], [212, 204, 1], [132, 174, 0], [188, 174, 0], [88, 180, 0], [232, 180, 0]];
 function sizeCatch() {
   const cv = $('#cCanvas'), g = $('#catchGame'), dpr = Math.min(2, window.devicePixelRatio || 1);
   CATCH.W = g.offsetWidth; CATCH.H = g.offsetHeight;
@@ -1708,14 +1710,21 @@ function drawCatch() {
   if (b.naturalWidth) {
     const k = CATCH.bounce || 0, W = BASKET.w, H = BASKET.h;
     c.save(); c.translate(CATCH.bx, CATCH.by + H / 2); c.scale(1 + .07 * k, 1 - .07 * k); c.translate(0, -H / 2);
-    c.drawImage(b, -W / 2, -H / 2, W, H);                                  // корзина целиком (задняя стенка)
-    const rimY = -H / 2 + H * BASKET.rim;
-    CATCH.pile.forEach((p, i) => {                                         // пойманное внутри
-      const im = CIMG[p.id]; if (!im.naturalWidth) return;
-      c.save(); c.translate(p.dx * W * .9, rimY + 4 - (i % 3) * 3); c.rotate(p.r); c.drawImage(im, -20, -20, 40, 40); c.restore();
-    });
-    const sy = b.naturalHeight * BASKET.rim;                               // передняя стенка поверх пойманного
-    c.drawImage(b, 0, sy + 2, b.naturalWidth, b.naturalHeight - sy - 2, -W / 2, rimY + 2 * H / b.naturalHeight, W, H - H * BASKET.rim - 2 * H / b.naturalHeight);
+    const kx = W / b.naturalWidth, ky = H / b.naturalHeight;
+    c.drawImage(b, -W / 2, -H / 2, W, H);                                  // корзина целиком: задняя стенка и дно
+    const g = c.createRadialGradient(0, -H / 2 + 186 * ky, 4, 0, -H / 2 + 186 * ky, 130 * kx);
+    g.addColorStop(0, 'rgba(70,38,12,.38)'); g.addColorStop(1, 'rgba(70,38,12,0)');
+    c.fillStyle = g; c.beginPath(); c.ellipse(0, -H / 2 + 180 * ky, 128 * kx, 40 * ky, 0, 0, Math.PI * 2); c.fill();   // тень внутри
+    const n = Math.min(CATCH.pile.length, PILE_SLOTS.length), sz = 96 * kx;
+    for (const row of [0, 1]) {                                          // задний ряд, потом передний
+      for (let i = 0; i < n; i++) {
+        const [sx, sy, r] = PILE_SLOTS[i]; if (r !== row) continue;
+        const p = CATCH.pile[CATCH.pile.length - n + i], im = CIMG[p.id]; if (!im.naturalWidth) continue;
+        c.save(); c.translate(-W / 2 + sx * kx, -H / 2 + sy * ky); c.rotate(p.r * .6); c.drawImage(im, -sz / 2, -sz / 2, sz, sz); c.restore();
+      }
+    }
+    const fr = CIMG.basket_front;                                          // передняя стенка поверх: пойманное лежит внутри
+    if (fr.naturalWidth) c.drawImage(fr, -W / 2, -H / 2, W, H);
     c.restore();
   }
   CATCH.pops.forEach(p => {

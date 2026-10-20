@@ -1030,60 +1030,32 @@ function hearts(n = 3) {
   }
 }
 
-/* ---------- ходьба: видео-цикл ----------
-   30 кадров шага на месте (ролик Wan 3.0, фон вырезан, кадры выровнены по шортам и ступням), лист 6×5.
-   Кадры идут с частотой 30 в секунду, слон по экрану двигается кодом. Вход в шаг и выход из него — короткий наплыв
-   с нашей позой, пока слон в движении. */
-const WALKV = new Image(); WALKV.src = 'assets/slon/rig/walkvid.webp';
-const WV = { n: 30, cols: 6, rows: 5, fps: 30, k: 993 / 470 };
-function drawWalkMix(t, still, mix) {
-  const Wc = petCanvas.width, Hc = petCanvas.height, sx = Wc / RIG.w;
-  pctx.clearRect(0, 0, Wc, Hc);
-  if (still && mix < 1) { const im = STILL[still]; if (im && im.naturalWidth) { pctx.globalAlpha = 1 - mix; pctx.drawImage(im, 0, 0, Wc, Hc); } }
-  if (mix > 0 && WALKV.naturalWidth) {
-    const i = Math.floor(t / 1000 * WV.fps) % WV.n, fw = WALKV.naturalWidth / WV.cols, fh = WALKV.naturalHeight / WV.rows;
-    const dw = 640 * WV.k * sx, dh = 560 * WV.k * sx, dx = (637 - 320 * WV.k) * sx, dy = (1125 - 540 * WV.k) * sx;
-    pctx.globalAlpha = mix; pctx.drawImage(WALKV, (i % WV.cols) * fw, Math.floor(i / WV.cols) * fh, fw, fh, dx, dy, dw, dh);
-  }
-  pctx.globalAlpha = 1;
-}
-// fadeIn / fadeOut — длительность наплыва из позы и в позу, мс
-function walkRun(dur, { from = null, to = null, fadeIn = 260, fadeOut = 300 } = {}) {
-  const done = poseQueue.then(() => new Promise(res => {
-    if (reduced || !WALKV.naturalWidth) { res(); return; }
-    morphing = true; lids.style.opacity = 0;
-    const t0 = performance.now();
-    const st = () => {
-      const t = performance.now() - t0;
-      if (t >= dur) { morphing = false; if (to) { pose = to; drawStill(to); } res(); return; }
-      let mix = 1, still = null;
-      if (from && t < fadeIn) { mix = t / fadeIn; still = from; }
-      if (to && t > dur - fadeOut) { mix = (dur - t) / fadeOut; still = to; }
-      drawWalkMix(t, still, mix); setTimeout(st, 16);
-    };
-    st();
-  }));
-  poseQueue = done;
-  return done;
+// шаги: позы ходьбы перетекают друг в друга, корпус покачивается в такт
+function walkCycle(n, step) {
+  const dur = reduced ? 10 : step * n;
+  const bob = play(petPop, t => { const ph = (t * n) % 1, side = Math.floor(t * n) % 2 ? 1 : -1; return { y: -8 * Math.sin(Math.PI * ph), r: 1.6 * side * Math.sin(Math.PI * ph) }; }, dur);
+  (async () => { for (let k = 1; k < n; k++) { const t1 = Date.now(); await setPose(k % 2 ? 'walk1' : 'walk2'); await wait(Math.max(0, step - (Date.now() - t1))); } })();
+  return { dur, bob };
 }
 async function walkOut() {
-  await setPose('idle');
-  const dur = reduced ? 10 : 1800;
-  const run = walkRun(dur, { from: 'idle', fadeIn: 260 });
-  const go = play(petMove, track([[0, { x: 0 }, E.in], [1, { x: 320 }]]), dur, { map: v => ({ transform: TF(v) }) });
+  const step = 460, n = 4;
+  await setPose('walk2');
+  const { dur, bob } = walkCycle(n, step);
+  const go = play(petMove, track([[0, { x: 0 }, E.in], [1, { x: 300 }]]), dur, { map: v => ({ transform: TF(v) }) });
   if (go) { go.effect.updateTiming({ fill: 'forwards' }); await go.finished.catch(() => {}); } else await wait(dur);
-  await run;
+  bob && bob.cancel();
   return go;
 }
 async function walkIn(text, hold) {
   busy = true;
-  const dur = reduced ? 10 : 2600;
-  const run = walkRun(dur, { to: 'hello', fadeOut: 320 });
-  const go = play(petMove, track([[0, { x: -320 }, E.soft], [1, { x: 0 }]]), dur);
+  const step = 460, n = 6;
+  await setPoseNow('walk2');
+  const { dur, bob } = walkCycle(n, step);
+  const go = play(petMove, track([[0, { x: -300 }, E.soft], [1, { x: 0 }]]), dur);
   hold && hold.cancel();
   if (go) await go.finished.catch(() => {}); else await wait(dur);
-  await run;
-  say(text, 3600); jump(28, 900);
+  bob && bob.cancel();
+  await setPose('hello'); say(text, 3600); jump(28, 900);
   await wait(1700); busy = false;
   dance(2600);
 }

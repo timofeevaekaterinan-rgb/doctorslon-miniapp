@@ -751,8 +751,8 @@ const FOOD_ART = Object.fromEntries([...FOODS.map(f => f.id), 'candy'].map(n => 
 const PET_H = 340;
 const RIG = { w: 1300, h: 1150, body: 993, bodyW: 1029, frames: 8 };
 const BOX_W = RIG.w * PET_H / RIG.body, BOX_H = RIG.h * PET_H / RIG.body;
-const RIG_POSES = ['idle', 'tilt', 'side', 'walk1', 'walk2', 'wave', 'brush', 'jump', 'hello', 'away', 'dance1', 'dance2', 'lean', 'point', 'brush2', 'cheer', 'back'];
-const RIG_PAIRS = ['idle_tilt', 'idle_wave', 'idle_hello', 'idle_lean', 'idle_point', 'idle_side', 'idle_brush', 'idle_brush2', 'idle_jump', 'idle_cheer', 'idle_back', 'idle_away', 'idle_walk2', 'idle_dance1', 'idle_dance2', 'brush_brush2', 'dance1_dance2', 'walk1_walk2'];
+const RIG_POSES = ['idle', 'tilt', 'side', 'walk1', 'walk2', 'wave', 'brush', 'jump', 'hello', 'away', 'dance1', 'dance2', 'lean', 'point', 'brush2', 'cheer', 'back', 'wk0', 'wk1', 'wk2', 'wk3'];
+const RIG_PAIRS = ['idle_tilt', 'idle_wave', 'idle_hello', 'idle_lean', 'idle_point', 'idle_side', 'idle_brush', 'idle_brush2', 'idle_jump', 'idle_cheer', 'idle_back', 'idle_away', 'idle_walk2', 'idle_dance1', 'idle_dance2', 'brush_brush2', 'dance1_dance2', 'walk1_walk2', 'idle_wk0'];
 const STILL = {}, STRIP = {};
 RIG_POSES.forEach(n => { const im = new Image(); im.src = `assets/slon/rig/${n}.webp`; im.onload = () => { if (n === pose && !morphing) drawStill(n); }; STILL[n] = im; });
 RIG_PAIRS.forEach(k => { const im = new Image(); im.src = `assets/slon/rig/t_${k}.webp`; STRIP[k] = im; });
@@ -1090,31 +1090,53 @@ function hearts(n = 3) {
   }
 }
 
-// шаги: позы ходьбы перетекают друг в друга, корпус покачивается в такт
-function walkCycle(n, step) {
-  const dur = reduced ? 10 : step * n;
-  const bob = play(petPop, t => { const ph = (t * n) % 1, side = Math.floor(t * n) % 2 ? 1 : -1; return { y: -8 * Math.sin(Math.PI * ph), r: 1.6 * side * Math.sin(Math.PI * ph) }; }, dur);
-  (async () => { for (let k = 1; k < n; k++) { const t1 = Date.now(); await setPose(k % 2 ? 'walk1' : 'walk2'); await wait(Math.max(0, step - (Date.now() - t1))); } })();
-  return { dur, bob };
+// шаги: цикл из 16 кадров (4 нарисованных шага + 12 промежуточных), соседние кадры плавно смешиваются.
+// Один полный цикл — два шага; корпус подпрыгивает и покачивается на каждом шаге.
+const WALK = new Image(); WALK.src = 'assets/slon/rig/walkcycle.webp';
+const WALK_N = 16, WALK_PERIOD = 1180;
+function walkFrame(pos) {
+  const W = petCanvas.width, H = petCanvas.height, fw = WALK.naturalWidth / WALK_N;
+  const k = Math.floor(pos) % WALK_N, f = pos - Math.floor(pos), k2 = (k + 1) % WALK_N;
+  pctx.clearRect(0, 0, W, H);
+  pctx.globalAlpha = 1 - f; pctx.drawImage(WALK, k * fw, 0, fw, WALK.naturalHeight, 0, 0, W, H);
+  if (f > .001) { pctx.globalAlpha = f; pctx.globalCompositeOperation = 'lighter'; pctx.drawImage(WALK, k2 * fw, 0, fw, WALK.naturalHeight, 0, 0, W, H); }
+  pctx.globalAlpha = 1; pctx.globalCompositeOperation = 'source-over';
+}
+function walkCycle(cycles) {
+  const dur = reduced ? 10 : WALK_PERIOD * cycles, steps = cycles * 2;
+  const bob = play(petPop, t => { const ph = (t * steps) % 1, side = Math.floor(t * steps) % 2 ? 1 : -1; return { y: -7 * Math.sin(Math.PI * ph), r: 1.4 * side * Math.sin(Math.PI * ph) }; }, dur);
+  const done = poseQueue.then(() => new Promise(res => {
+    if (!WALK.naturalWidth || reduced) { res(); return; }
+    morphing = true; lids.style.opacity = 0;
+    const t0 = performance.now();
+    const st = () => {
+      const t = performance.now() - t0;
+      if (t >= dur) { pose = 'wk0'; drawStill('wk0'); morphing = false; res(); return; }
+      walkFrame((t / WALK_PERIOD * WALK_N) % WALK_N); setTimeout(st, 16);
+    };
+    st();
+  }));
+  poseQueue = done;
+  return { dur, bob, done };
 }
 async function walkOut() {
-  const step = 460, n = 4;
-  await setPose('walk2');
-  const { dur, bob } = walkCycle(n, step);
+  await setPose('wk0');
+  const { dur, bob } = walkCycle(2);
   const go = play(petMove, track([[0, { x: 0 }, E.in], [1, { x: 300 }]]), dur, { map: v => ({ transform: TF(v) }) });
   if (go) { go.effect.updateTiming({ fill: 'forwards' }); await go.finished.catch(() => {}); } else await wait(dur);
   bob && bob.cancel();
+  await poseQueue;
   return go;
 }
 async function walkIn(text, hold) {
   busy = true;
-  const step = 460, n = 6;
-  await setPoseNow('walk2');
-  const { dur, bob } = walkCycle(n, step);
+  await setPoseNow('wk0');
+  const { dur, bob } = walkCycle(3);
   const go = play(petMove, track([[0, { x: -300 }, E.soft], [1, { x: 0 }]]), dur);
   hold && hold.cancel();
   if (go) await go.finished.catch(() => {}); else await wait(dur);
   bob && bob.cancel();
+  await poseQueue;
   await setPose('hello'); say(text, 3600); jump(28, 900);
   await wait(1700); busy = false;
   dance(2600);

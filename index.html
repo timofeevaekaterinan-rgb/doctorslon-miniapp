@@ -984,49 +984,9 @@ async function dance(ms = 3600) {
   await wait(n * beat);
   await setPose('idle'); busy = false;
 }
-/* ---------- покадровые анимации из листов ----------
-   Лист — сетка кадров на общем холсте слона (780×690 на кадр). Первый и последний кадр — наша базовая поза,
-   поэтому анимация начинается и заканчивается без шва. Соседние кадры плавно смешиваются. */
-const SHEETS = {
-  wave: { src: 'assets/slon/rig/wavegpt.webp', n: 29, cols: 8, dur: 1800 }   // машет лапой: кадры ChatGPT + промежуточные
-};
-Object.values(SHEETS).forEach(sh => { sh.img = new Image(); sh.img.src = sh.src; });
-function sheetFrame(sh, pos) {
-  const Wc = petCanvas.width, Hc = petCanvas.height, im = sh.img;
-  const fw = im.naturalWidth / sh.cols, fh = im.naturalHeight / Math.ceil(sh.n / sh.cols);
-  const k = Math.min(sh.n - 1, Math.floor(pos)), f = pos - k, k2 = Math.min(sh.n - 1, k + 1);
-  const at = i => [(i % sh.cols) * fw, Math.floor(i / sh.cols) * fh];
-  pctx.clearRect(0, 0, Wc, Hc);
-  let [x, y] = at(k); pctx.globalAlpha = 1 - f; pctx.drawImage(im, x, y, fw, fh, 0, 0, Wc, Hc);
-  if (f > .001) { [x, y] = at(k2); pctx.globalAlpha = f; pctx.globalCompositeOperation = 'lighter'; pctx.drawImage(im, x, y, fw, fh, 0, 0, Wc, Hc); }
-  pctx.globalAlpha = 1; pctx.globalCompositeOperation = 'source-over';
-}
-function playSheet(name) {
-  const sh = SHEETS[name];
-  poseQueue = poseQueue.then(async () => {
-    if (pose !== 'idle') await setPose('idle');
-  }).then(() => new Promise(res => {
-    if (reduced || !sh.img.naturalWidth) { res(); return; }
-    morphing = true; lids.style.opacity = 0;
-    const t0 = performance.now();
-    const st = () => {
-      const t = Math.min(1, (performance.now() - t0) / sh.dur);
-      const e = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;   // мягкий разгон и торможение
-      sheetFrame(sh, e * (sh.n - 1));
-      if (t < 1) setTimeout(st, 16); else { pose = 'idle'; morphing = false; drawStill('idle'); res(); }
-    };
-    st();
-  }));
-  return poseQueue;
-}
-async function waveHello(text) {
-  busy = true; if (text) say(text, 2400);
-  await playSheet('wave');
-  busy = false;
-}
 const IDLE = [
-  () => waveHello(pick(['Привет!', 'Я тут!', 'Как дела?'])),
-  () => waveHello(),
+  () => gesture('hello', 1700, pick(['Привет!', 'Я тут!', 'Как дела?'])),
+  () => gesture('wave', 1500),
   () => gesture('lean', 1800, pick(['Что там у тебя?', 'Покажешь, что купим?'])),
   () => gesture('point', 1800, pick(['Смотри, какая щётка!', 'Я молодец!'])),
   () => { say('Танцую!', 2400); dance(); },
@@ -1180,7 +1140,7 @@ async function onPetEnter() {
     say('Привет! Лови со мной фрукты и чисти зубки — я буду расти и дарить промокоды', 3800);
     await wait(1800); setPose('idle'); busy = false;
     setTimeout(() => { if (current === 'pet' && !busy) gesture('tilt', 2200, 'Зубки чешутся… почистим?'); }, 4200);
-  } else if (!busy) { waveHello(); }
+  } else if (!busy) { busy = true; setPose('wave'); jump(24); await wait(1100); await setPose('idle'); busy = false; }
 }
 
 /* ---------- каталог ---------- */

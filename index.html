@@ -771,10 +771,67 @@ function sizePet() {
   drawStill(pose);
 }
 function drawStill(n) {
+  if (n === 'idle' && drawIdle()) { lids.style.opacity = 1; return; }
   const im = STILL[n]; if (!im || !im.naturalWidth) return;
   pctx.clearRect(0, 0, petCanvas.width, petCanvas.height);
   pctx.drawImage(im, 0, 0, petCanvas.width, petCanvas.height);
   lids.style.opacity = n === 'idle' ? 1 : 0;
+}
+
+/* ---------- уши: отдельные слои базовой позы с пружинной физикой ----------
+   Уши лежат за головой. Корень уха неподвижен, кончик изгибается вверх-вниз и чуть сжимается
+   (ухо хлопает вперёд). Ушам задаётся пружина: они запаздывают за корпусом при прыжках и покачивании
+   и иногда сами похлопывают. Координаты — в пикселях слоя 780×690 (общий холст 1300×1150 × 0,6). */
+const EARL = new Image(), EARR = new Image(), CORE = new Image();
+EARL.src = 'assets/slon/rig/idle_earL.webp'; EARR.src = 'assets/slon/rig/idle_earR.webp'; CORE.src = 'assets/slon/rig/idle_core.webp';
+[EARL, EARR, CORE].forEach(im => im.onload = () => { if (pose === 'idle' && !morphing) drawStill('idle'); });
+const EAR = { a: 0, v: 0, b: 0, vb: 0, tipL: 92.4, rootL: 249, tipR: 709.8, rootR: 555, lift: 42, lastY: 0, lastV: 0, nextFlap: 0, t0: performance.now() };
+function drawEar(img, tip, root, a) {
+  const S = petCanvas.width / img.naturalWidth, H = img.naturalHeight, span = root - tip;
+  const x0 = Math.floor(Math.min(tip, root)) - 2, x1 = Math.ceil(Math.max(tip, root)) + 2;
+  for (let x = x0; x < x1; x++) {
+    const t = Math.max(0, Math.min(1, (root - x) / span)), tt = Math.pow(t, 1.6);
+    const dy = -a * EAR.lift * tt, nx = root - (root - x) * (1 - Math.abs(a) * .1 * t);
+    pctx.drawImage(img, x, 0, 1, H, nx * S, dy * S, 1.8 * S, H * S);   // полоска 1 px растянута на 1,8 — без щелей
+  }
+}
+function drawIdle() {
+  if (!EARL.naturalWidth || !EARR.naturalWidth || !CORE.naturalWidth) return false;
+  pctx.clearRect(0, 0, petCanvas.width, petCanvas.height);
+  drawEar(EARL, EAR.tipL, EAR.rootL, EAR.a + EAR.b);
+  drawEar(EARR, EAR.tipR, EAR.rootR, EAR.a - EAR.b);
+  pctx.drawImage(CORE, 0, 0, petCanvas.width, petCanvas.height);
+  return true;
+}
+const mtxY = el => { const t = getComputedStyle(el).transform; return t && t !== 'none' ? new DOMMatrix(t).m42 : 0; };
+function earTick() {
+  const now = performance.now(), dt = Math.min(.05, (now - (EAR.last || now)) / 1000) || .016; EAR.last = now;
+  if (pose === 'idle' && !morphing && !reduced) {
+    // ускорение корпуса по вертикали: прыжок, приседание, подпрыгивания в танце
+    const y = mtxY(petMove) + mtxY(petPop) + mtxY($('.pet-anim'));
+    const vel = (y - EAR.lastY) / dt, acc = (vel - EAR.lastV) / dt;
+    EAR.lastY = y; EAR.lastV = vel;
+    const accS = Math.max(-4000, Math.min(4000, acc));
+    // само похлопывание: раз в 5–10 секунд, иногда двойное
+    if (now > EAR.nextFlap) {
+      if (EAR.nextFlap) { EAR.v += 6.5; EAR.vb += rnd(-1.5, 1.5); if (Math.random() < .35) setTimeout(() => { EAR.v += 5; }, 260); }
+      EAR.nextFlap = now + rnd(5000, 10000);
+    }
+    const breath = .06 * Math.sin((now - EAR.t0) / 1000 * 1.4);   // лёгкое дыхание ушами
+    EAR.v += (-60 * (EAR.a - breath) - 6.5 * EAR.v + accS * .04) * dt;
+    EAR.vb += (-45 * EAR.b - 6 * EAR.vb) * dt;
+    EAR.a = Math.max(-1.2, Math.min(1.2, EAR.a + EAR.v * dt)); EAR.b += EAR.vb * dt;
+    drawIdle();
+  }
+  setTimeout(earTick, 16);
+}
+setTimeout(earTick, 0);   // после загрузки всего скрипта
+// перед сменой позы уши мягко возвращаются в исходное, чтобы переход начался с неподвижной картинки
+async function settleEars() {
+  const a0 = EAR.a, b0 = EAR.b, t0 = performance.now(), D = 160;
+  if (Math.abs(a0) < .03 && Math.abs(b0) < .03) return;
+  await new Promise(res => { const st = () => { const k = Math.min(1, (performance.now() - t0) / D), e = 1 - (1 - k) * (1 - k);
+    EAR.a = a0 * (1 - e); EAR.b = b0 * (1 - e); EAR.v = EAR.vb = 0; drawIdle(); if (k < 1) setTimeout(st, 16); else res(); }; st(); });
 }
 // k = 0 — исходная поза, 1..N — кадры ленты, N+1 — целевая поза
 function srcDraw(seg, from, to, k, alpha, op) {
@@ -831,6 +888,7 @@ function setPose(name) {
   poseQueue = poseQueue.then(async () => {
     if (name === pose) { drawStill(name); return; }
     const steps = reduced ? [] : route(pose, name);
+    if (pose === 'idle') await settleEars();
     morphing = true; lids.style.opacity = 0;
     const L = steps.length;
     for (let si = 0; si < L; si++) {
@@ -1015,8 +1073,10 @@ async function petTap() {
   S.needs.joy = Math.min(100, S.needs.joy + 3); renderNeeds();
   if (taps.length >= 5) { taps = []; busy = true; await setPose('back'); say('Ой, щекотно! Хватит!'); await wait(1800); await setPose('idle'); busy = false; return; }
   if (taps.length === 3) { say('Потанцуем!', 2400); dance(2400); return; }
-  busy = true; setPose(pick(['jump', 'cheer'])); jump(); say(pick(['Хи-хи!', 'Ещё!', 'Ура!', 'Люблю тебя!']), 1800);
-  await wait(1000); await setPose('idle'); busy = false;
+  say(pick(['Хи-хи!', 'Ещё!', 'Ура!', 'Люблю тебя!']), 1800);
+  busy = true;
+  if (Math.random() < .6) { jump(80, 1120); await wait(1200); busy = false; return; }   // прыжок в базовой позе: уши хлопают
+  setPose(pick(['jump', 'cheer'])); jump(); await wait(1000); await setPose('idle'); busy = false;
 }
 function hearts(n = 3) {
   const pet = $('#pet'); const r = pet.getBoundingClientRect(), sr = screenEl.getBoundingClientRect(), s = scaleNow();

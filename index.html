@@ -695,10 +695,10 @@ const FLAGS = {
   it: '<svg class="flag" viewBox="0 0 18 13"><rect width="6" height="13" fill="#1f9d55"/><rect x="6" width="6" height="13" fill="#fff"/><rect x="12" width="6" height="13" fill="#e2263b"/></svg>'
 };
 const PLACES = {
-  home: { name: 'Дом', bg: 'assets/bg/home.jpg', hello: 'Я дома! Тут мои щётки и пасты' },
-  ch: { name: 'Швейцария', bg: 'assets/bg/swiss.jpg', in: 'Швейцарии', hello: 'Привет из Альп! Тут такой свежий воздух' },
-  jp: { name: 'Япония', bg: 'assets/bg/japan.jpg', in: 'Японии', hello: 'Сакура цветёт! Коннитива!' },
-  it: { name: 'Италия', bg: 'assets/bg/italy.jpg', in: 'Италии', hello: 'Чао! Как тут солнечно' }
+  home: { name: 'Дом', bg: 'assets/bg/home.jpg', hello: 'Я дома, в своей ванной!' },
+  ch: { name: 'Швейцария', bg: 'assets/bg/swiss.jpg', in: 'Швейцарии', hello: 'Привет из Альп! Как тебе моя шляпа?' },
+  jp: { name: 'Япония', bg: 'assets/bg/japan.jpg', in: 'Японии', hello: 'Коннитива! Смотри, я в кимоно!' },
+  it: { name: 'Италия', bg: 'assets/bg/italy.jpg', in: 'Италии', hello: 'Чао! Я теперь гондольер!' }
 };
 const PRODUCTS = [
   { id: 'cura', name: 'Curaprox CS 5460 Ultra Soft', type: 'Зубная щётка', cat: 'brush', price: 590, old: 690, earn: 60, country: 'ch', rating: '4,9', reviews: '1 204', hit: true, art: 'brush', tint: '#fff0e6' },
@@ -770,8 +770,13 @@ function sizePet() {
   pctx.imageSmoothingQuality = 'high';
   drawStill(pose);
 }
+// наряды по странам: нарисованы на базовой позе, поэтому в стране слоник стоит в наряде,
+// а жесты со сменой позы отключены (прыжки, покачивание, моргание и реплики остаются)
+const OUTFIT = {};
+['jp', 'ch', 'it'].forEach(k => { const im = new Image(); im.src = `assets/slon/rig/idle_${k}.webp`; im.onload = () => { if (pose === 'idle' && !morphing) drawStill('idle'); }; OUTFIT[k] = im; });
+const costume = () => S.loc !== 'home' && OUTFIT[S.loc] && OUTFIT[S.loc].naturalWidth > 0;
 function drawStill(n) {
-  const im = STILL[n]; if (!im || !im.naturalWidth) return;
+  const im = n === 'idle' && costume() ? OUTFIT[S.loc] : STILL[n]; if (!im || !im.naturalWidth) return;
   pctx.clearRect(0, 0, petCanvas.width, petCanvas.height);
   pctx.drawImage(im, 0, 0, petCanvas.width, petCanvas.height);
   lids.style.opacity = n === 'idle' ? 1 : 0;
@@ -829,6 +834,7 @@ function route(a, b) {
 // плавная смена позы: проигрываем промежуточные кадры по 40 мс (25 к/с), потом ставим целевую позу
 function setPose(name) {
   poseQueue = poseQueue.then(async () => {
+    if (costume() && name !== 'idle') name = 'idle';
     if (name === pose) { drawStill(name); return; }
     const steps = reduced ? [] : route(pose, name);
     morphing = true; lids.style.opacity = 0;
@@ -844,7 +850,7 @@ function setPose(name) {
   });
   return poseQueue;
 }
-function setPoseNow(name) { poseQueue = poseQueue.then(() => { pose = name; morphing = false; drawStill(name); }); return poseQueue; }
+function setPoseNow(name) { poseQueue = poseQueue.then(() => { if (costume()) name = 'idle'; pose = name; morphing = false; drawStill(name); }); return poseQueue; }
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------- движок анимации слона ----------
@@ -990,6 +996,7 @@ async function dance(ms = 3600) {
 const WAVE6 = new Image(); WAVE6.src = 'assets/slon/rig/wave6.webp';
 const WAVE6_N = 6, WAVE6_MS = 260;
 function playWave6() {
+  if (costume()) { jump(40, 900); return wait(950); }   // в наряде вместо взмаха — прыжок
   poseQueue = poseQueue.then(async () => { if (pose !== 'idle') await setPose('idle'); })
     .then(() => new Promise(res => {
       if (reduced || !WAVE6.naturalWidth) { res(); return; }

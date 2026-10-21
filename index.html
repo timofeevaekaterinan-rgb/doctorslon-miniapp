@@ -695,7 +695,7 @@ const FLAGS = {
   it: '<svg class="flag" viewBox="0 0 18 13"><rect width="6" height="13" fill="#1f9d55"/><rect x="6" width="6" height="13" fill="#fff"/><rect x="12" width="6" height="13" fill="#e2263b"/></svg>'
 };
 const PLACES = {
-  home: { name: 'Дом', bg: 'assets/bg/home.jpg', hello: 'Я дома, в своей ванной!' },
+  home: { name: 'Дом', bg: 'assets/bg/home.jpg', pos: '50% 100%', hello: 'Я дома, в своей ванной!' },
   ch: { name: 'Швейцария', bg: 'assets/bg/swiss.jpg', in: 'Швейцарии', hello: 'Привет из Альп! Как тебе моя шляпа?' },
   jp: { name: 'Япония', bg: 'assets/bg/japan.jpg', in: 'Японии', hello: 'Коннитива! Смотри, я в кимоно!' },
   it: { name: 'Италия', bg: 'assets/bg/italy.jpg', in: 'Италии', hello: 'Чао! Я теперь гондольер!' }
@@ -1354,8 +1354,9 @@ let bgFront = 'A';
 function setBg(k, instant) {
   const next = bgFront === 'A' ? 'B' : 'A';
   const nEl = $('#bg' + next), cEl = $('#bg' + bgFront);
-  nEl.style.backgroundImage = `url(${PLACES[k].bg})`;
-  if (instant) { cEl.style.backgroundImage = nEl.style.backgroundImage; return; }
+  // дом привязан к низу экрана: коврик всегда под ногами слоника, раковина за ним
+  nEl.style.backgroundImage = `url(${PLACES[k].bg})`; nEl.style.backgroundPosition = PLACES[k].pos || '';
+  if (instant) { cEl.style.backgroundImage = nEl.style.backgroundImage; cEl.style.backgroundPosition = nEl.style.backgroundPosition; return; }
   nEl.style.opacity = 1; cEl.style.opacity = 0; bgFront = next;
 }
 async function travel(k) {

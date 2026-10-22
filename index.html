@@ -1,4 +1,8 @@
 <title>Слоник Доктор Слон</title>
+<meta name="author" content="Атвинта">
+<meta name="copyright" content="© 2026 Атвинта. Все права защищены">
+<meta name="robots" content="noindex, nofollow">
+<!-- © 2026 Атвинта (atwinta.ru). Все права защищены. Копирование, передача третьим лицам и использование материалов без письменного согласия Атвинты запрещены. -->
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -54,6 +58,18 @@ img{max-width:100%;display:block}
 .stories{margin:12px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;font-size:14px;line-height:1.45}
 .stories li b{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;opacity:.65;margin-bottom:2px}
 .guide-foot{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12px;opacity:.75}
+.made{display:flex;flex-direction:column;gap:8px;padding-top:16px;border-top:1px solid rgba(255,255,255,.18)}
+.made-top{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:500;opacity:.85;color:inherit;text-decoration:none;align-self:flex-start}
+.made-top:hover{opacity:1}
+.made p a,.made-app p a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.made-site{font-size:12px;font-weight:500;color:inherit;opacity:.85}
+.made .atw-logo{height:22px;width:auto;display:block}
+.made p{margin:0;font-size:11px;line-height:1.5;opacity:.6}
+.made-app{display:flex;flex-direction:column;gap:6px;padding:16px 0 28px;border-top:1px solid var(--line);margin-top:8px;color:var(--muted)}
+.made-app .made-top{font-size:12px;color:var(--ink-2);opacity:1}
+.made-app .atw-logo{height:16px;width:auto;display:block}
+.made-app p{margin:0;font-size:11px;line-height:1.45}
+img{-webkit-user-drag:none;user-select:none}
 .reset{background:#fff;color:var(--blue);font-weight:700;font-size:14px;padding:10px 16px;border-radius:12px;opacity:1}
 
 .device-wrap{width:calc(414px * var(--s));height:calc(868px * var(--s));flex:none}
@@ -103,7 +119,7 @@ img{max-width:100%;display:block}
 .task small{color:var(--muted);font-size:13px;display:flex;gap:4px;align-items:center;margin-top:2px}
 .task .chk{width:24px;height:24px;border-radius:50%;border:2px solid var(--line)}
 .task .chk.on{background:var(--green);border-color:var(--green);color:#fff;display:grid;place-items:center}
-.cats{display:flex;flex-direction:column;gap:8px;padding-bottom:24px}
+.cats{display:flex;flex-direction:column;gap:8px;padding-bottom:16px}
 .cat{display:flex;align-items:center;justify-content:space-between;height:56px;border-radius:14px;padding:0 16px;background:linear-gradient(90deg,#f1f3fb 40%, #c9f1e8);font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
 
 /* каталог */
@@ -505,6 +521,16 @@ img{max-width:100%;display:block}
       </ul>
     </details>
     <div class="guide-foot"><button class="reset" id="resetDemo">Начать демо заново</button><span>Товары и&nbsp;цены условные</span></div>
+    <div class="made">
+      <a class="made-top" href="https://atwinta.ru/" target="_blank" rel="noopener"><span>Сделано в</span><svg class="atw-logo" role="img" aria-label="Атвинта" viewBox="0 0 164 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M12.091 2L0 30.0224H6.58526L9.3921 23.6433H20.2416L23.0484 30.0224H29.7416L17.6507 2H12.091ZM18.4063 18.859H11.2273L14.8438 9.67153L18.4063 18.859ZM164 24.7581V29.3554C163.187 29.9969 162.049 30.3176 160.532 30.3176C157.931 30.3176 156.251 29.3554 155.384 27.4309C153.38 29.4623 150.779 30.478 147.582 30.478C142.706 30.478 139.238 27.5378 139.238 22.9939C139.238 20.6418 140.105 18.7708 141.893 17.5413C143.681 16.3118 145.74 15.6703 148.178 15.6703C150.725 15.6703 153.049 16.0979 154.891 17.0602V16.3652C154.891 13.532 152.73 12.1421 148.72 12.1421C146.336 12.1421 143.964 12.7836 141.85 14.0131V8.72082C144.18 7.4913 146.986 6.95671 150.291 6.95671C153.488 6.95671 156.143 7.70513 158.094 9.30885C160.098 10.8591 161.068 12.9974 161.068 15.7772V23.3147C161.068 24.4373 161.616 25.0253 162.645 25.0253C163.187 25.0253 163.675 24.9184 164 24.7581ZM154.836 21.0695C153.536 20.2142 151.863 19.7865 150.02 19.7865C147.311 19.7865 145.577 20.8557 145.577 22.6732C145.577 24.6511 147.257 25.5599 149.641 25.5599C151.863 25.5599 153.699 24.8115 154.891 23.2612V21.0695H154.836ZM32.8931 30.0216L32.8873 12.9348H26.7417V7.69482H44.4922V12.9348H39.2932L39.2868 30.0216H32.8931ZM126.37 30.0216L126.364 12.9348H121.165V7.69482H138.916V12.9348H132.77L132.764 30.0216H126.37ZM47.0928 7.69482V30.04H59.6872C64.943 30.04 67.9231 27.6345 67.9231 23.8924C67.9231 21.0592 66.4601 19.1347 63.5884 18.1725C65.4306 17.2102 66.3518 15.66 66.3518 13.4148C66.3518 10.1539 63.8051 7.69482 59.0912 7.69482H47.0928ZM57.0322 16.58H53.4987V12.0249H57.0322C59.0912 12.0249 60.0665 12.8267 60.0665 14.3235C60.0665 15.8203 59.0912 16.58 57.0322 16.58ZM58.0075 25.478H53.4987V20.453H58.0075C60.229 20.453 61.3127 21.3083 61.3127 22.9655C61.3127 24.6227 60.229 25.478 58.0075 25.478ZM70.7583 30.0401V7.69492H77.1642V20.8454L87.2843 7.69492L93.4077 7.69482V30.0216L87.0018 30.0218L87.0134 16.8896L76.7727 30.0401H70.7583ZM96.5547 7.69482V30.0216H102.961L102.948 21.3643H112.341V30.0216H118.747L118.734 7.69482H112.341V16.1243H102.948L102.961 7.69482H96.5547Z" fill="white"/>
+<rect x="71" y="34" width="22" height="5" fill="#FF2159"/>
+</g>
+</svg></a>
+      <a class="made-site" href="https://atwinta.ru/" target="_blank" rel="noopener">atwinta.ru</a>
+      <p>© 2026 <a href="https://atwinta.ru/" target="_blank" rel="noopener">Атвинта</a>. Все права защищены. Концепция, персонаж, графика, механики и&nbsp;код прототипа – собственность Атвинты. Копирование, передача третьим лицам и&nbsp;использование без письменного согласия Атвинты запрещены.</p>
+    </div>
   </aside>
 
   <div class="device-wrap"><div class="device"><div class="screen" id="screen">
@@ -538,6 +564,10 @@ img{max-width:100%;display:block}
           <button class="cat" data-nav="catalog" data-cat="brush">Зубные щётки<svg class="ic ic-s"><use href="#i-chev"/></svg></button>
           <button class="cat" data-nav="catalog" data-cat="paste">Зубные пасты<svg class="ic ic-s"><use href="#i-chev"/></svg></button>
         </div>
+        <div class="made-app"><a class="made-top" href="https://atwinta.ru/" target="_blank" rel="noopener"><span>Демо-прототип · сделано в</span><svg class="atw-logo" role="img" aria-label="Атвинта" viewBox="0 0 164 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M12.091 2L0 30.0224H6.58526L9.3921 23.6433H20.2416L23.0484 30.0224H29.7416L17.6507 2H12.091ZM18.4063 18.859H11.2273L14.8438 9.67153L18.4063 18.859ZM164 24.7581V29.3554C163.187 29.9969 162.049 30.3176 160.532 30.3176C157.931 30.3176 156.251 29.3554 155.384 27.4309C153.38 29.4623 150.779 30.478 147.582 30.478C142.706 30.478 139.238 27.5378 139.238 22.9939C139.238 20.6418 140.105 18.7708 141.893 17.5413C143.681 16.3118 145.74 15.6703 148.178 15.6703C150.725 15.6703 153.049 16.0979 154.891 17.0602V16.3652C154.891 13.532 152.73 12.1421 148.72 12.1421C146.336 12.1421 143.964 12.7836 141.85 14.0131V8.72082C144.18 7.4913 146.986 6.95671 150.291 6.95671C153.488 6.95671 156.143 7.70513 158.094 9.30885C160.098 10.8591 161.068 12.9974 161.068 15.7772V23.3147C161.068 24.4373 161.616 25.0253 162.645 25.0253C163.187 25.0253 163.675 24.9184 164 24.7581ZM154.836 21.0695C153.536 20.2142 151.863 19.7865 150.02 19.7865C147.311 19.7865 145.577 20.8557 145.577 22.6732C145.577 24.6511 147.257 25.5599 149.641 25.5599C151.863 25.5599 153.699 24.8115 154.891 23.2612V21.0695H154.836ZM32.8931 30.0216L32.8873 12.9348H26.7417V7.69482H44.4922V12.9348H39.2932L39.2868 30.0216H32.8931ZM126.37 30.0216L126.364 12.9348H121.165V7.69482H138.916V12.9348H132.77L132.764 30.0216H126.37ZM47.0928 7.69482V30.04H59.6872C64.943 30.04 67.9231 27.6345 67.9231 23.8924C67.9231 21.0592 66.4601 19.1347 63.5884 18.1725C65.4306 17.2102 66.3518 15.66 66.3518 13.4148C66.3518 10.1539 63.8051 7.69482 59.0912 7.69482H47.0928ZM57.0322 16.58H53.4987V12.0249H57.0322C59.0912 12.0249 60.0665 12.8267 60.0665 14.3235C60.0665 15.8203 59.0912 16.58 57.0322 16.58ZM58.0075 25.478H53.4987V20.453H58.0075C60.229 20.453 61.3127 21.3083 61.3127 22.9655C61.3127 24.6227 60.229 25.478 58.0075 25.478ZM70.7583 30.0401V7.69492H77.1642V20.8454L87.2843 7.69492L93.4077 7.69482V30.0216L87.0018 30.0218L87.0134 16.8896L76.7727 30.0401H70.7583ZM96.5547 7.69482V30.0216H102.961L102.948 21.3643H112.341V30.0216H118.747L118.734 7.69482H112.341V16.1243H102.948L102.961 7.69482H96.5547Z" fill="#222222"/>
+<rect x="71" y="34" width="22" height="5" fill="#FF2159"/>
+</svg></a><p>© 2026 <a href="https://atwinta.ru/" target="_blank" rel="noopener">Атвинта</a>. Все права защищены. Концепция, персонаж, графика, механики и&nbsp;код прототипа – собственность Атвинты. Копирование, передача третьим лицам и&nbsp;использование без письменного согласия Атвинты запрещены.</p></div>
       </div>
     </section>
 
@@ -1852,6 +1882,9 @@ $$('.step').forEach(b => b.addEventListener('click', () => {
   }
 }));
 $('#resetDemo').addEventListener('click', () => location.reload());
+document.addEventListener('contextmenu', e => { if (e.target.closest('img, canvas, .screen')) e.preventDefault(); });
+document.addEventListener('dragstart', e => { if (e.target.closest('img, canvas')) e.preventDefault(); });
+console.info('%c© 2026 Атвинта. Все права защищены.%c\nКопирование, передача третьим лицам и использование материалов прототипа без письменного согласия Атвинты запрещены.', 'font-weight:700;font-size:13px', '');
 
 /* ---------- масштаб телефона ---------- */
 function fit() {
